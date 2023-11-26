@@ -18,7 +18,6 @@ export interface User {
   uid: string;
   name: string;
   email: string;
-  username: string;
 }
 
 type Response = Promise<void | { error?: { message: string } }>;
@@ -28,12 +27,12 @@ interface AuthContext {
   loading?: boolean;
   signUp: (credentials: {
     name: string;
-    username: string;
     email: string;
     password: string;
   }) => Response;
   signIn: (credentials: { email: string; password: string }) => Promise<any>;
   signOut: () => Response;
+  setLoading: (loading: boolean) => void;
 }
 
 const authContext = createContext({ user: {} } as AuthContext);
@@ -63,17 +62,15 @@ const useAuthProvider = () => {
     }
   };
 
-  const signUp = async ({ name, username, email, password }: any) => {
+  const signUp = async ({ name, email, password }: any) => {
     setLoading(true);
     try {
       return await createUserWithEmailAndPassword(auth, email, password).then(
         (response: any) => {
-          setLoading(false);
           return createUser({
             uid: response.user.uid,
             email: email.toLowerCase(),
             name,
-            username,
           });
         }
       );
@@ -138,5 +135,6 @@ const useAuthProvider = () => {
     signUp,
     signIn,
     signOut,
+    setLoading,
   };
 };

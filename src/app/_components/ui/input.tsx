@@ -1,13 +1,20 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/app/_lib/utils"
+import { cn } from "@/app/_lib/utils";
+import { Label } from "./label";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
-    return (
+const Input = React.forwardRef<
+  HTMLInputElement,
+  InputProps & { label: string }
+>(({ className, type, label, ...props }, ref) => {
+  return (
+    <div className="flex flex-col">
+      <Label htmlFor={props.id} className="pb-3">
+        {label}
+      </Label>
       <input
         type={type}
         className={cn(
@@ -17,9 +24,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         {...props}
       />
-    )
-  }
-)
-Input.displayName = "Input"
+    </div>
+  );
+});
+Input.displayName = "Input";
 
-export { Input }
+export { Input };
