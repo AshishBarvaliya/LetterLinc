@@ -17,7 +17,7 @@ export default function Home() {
     }
   }, [loading, router, user]);
 
-  return !user ? null : (
+  return (
     <div className="flex h-screen">
       <LoginHeader buttonText="Sign up" href="/sign-up" />
       <div className="hidden w-1/2 bg-zinc-900 border-r lg:flex">
