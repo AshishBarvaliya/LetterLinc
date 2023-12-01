@@ -56,7 +56,14 @@ const useAuthProvider = () => {
       return db
         .collection("users")
         .doc(currentUser.uid)
-        .set({ ...currentUser }, { merge: true });
+        .set(
+          {
+            ...currentUser,
+            createdAt: new Date(),
+            credits: process.env.NEXT_PUBLIC_LETTERLINC_CREDITS || 0,
+          },
+          { merge: true }
+        );
     } catch (error) {
       return { error };
     }

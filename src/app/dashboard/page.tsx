@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_hooks/useAuth";
 import Image from "next/image";
@@ -21,10 +21,66 @@ import {
   SelectValue,
 } from "../_components/ui/select";
 import { Label } from "../_components/ui/label";
+import { useToast } from "../_hooks/use-toast";
+import { db, storage } from "../_lib/firebase";
+import axios from "axios";
 
 export default function Dashboard() {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
   const { loading, user, signOut } = useAuth();
+  const { toast } = useToast();
+  const storageRef = storage.ref();
+
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+
+  const uploadFile = async (file: File) => {
+    if (file) {
+      setSubmitLoading(true);
+      toast({
+        title: "Uploading file...",
+      });
+      const filename = user.email + "/" + (+new Date() + "_" + file.name);
+
+      const fileRef = storageRef.child(filename);
+      const uploadTask = fileRef.put(file);
+
+      uploadTask.then(async () => {
+        const url = await fileRef.getDownloadURL();
+        axios
+          .post(`/api/run`, {
+            url,
+            vectorSpace: filename + "vectorSpace",
+          })
+          .then(() => {
+            db.collection("resumes")
+              .add({
+                createdAt: new Date(),
+                email: user.email,
+                filename,
+                url,
+                vectorSpace: filename + "vectorSpace",
+              })
+              .then(() => {
+                toast({
+                  variant: "success",
+                  title: "The file has been uploaded!",
+                });
+              });
+          })
+          .catch((error: any) => {
+            toast({
+              variant: "destructive",
+              title: `Failed to upload ${file.name}: ${error}`,
+            });
+            console.error(`Failed to upload ${file.name}: ${error}`);
+          })
+          .finally(() => {
+            setSubmitLoading(false);
+          });
+      });
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -86,14 +142,43 @@ export default function Dashboard() {
                     <SelectItem value="system">System</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">Upload</Button>
-                <Button variant="outline">View all</Button>
+                <input
+                  type="file"
+                  ref={inputRef}
+                  className="hidden"
+                  accept="application/pdf"
+                  name="files"
+                  id="files"
+                  onChange={async (e) => {
+                    if (e.target.files?.length) {
+                      //@ts-ignore
+                      if (e.target.files[0].size > 1000000) {
+                        toast({
+                          variant: "destructive",
+                          title: "File too large: 1MB max",
+                        });
+                      } else {
+                        await uploadFile(e.target.files[0]);
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={submitLoading}
+                >
+                  Upload
+                </Button>
+                <Button variant="outline" disabled={submitLoading}>
+                  View all
+                </Button>
               </div>
             </div>
             <Textarea label={"Job Description"} />
           </div>
           <div className="flex justify-end">
-            <Button>Generate</Button>
+            <Button disabled={submitLoading}>Generate</Button>
           </div>
         </div>
       </div>

@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     if (!body.url || !body.vectorSpace) {
       return new NextResponse(JSON.stringify({ error: "url missing" }), {
         status: 400,
+        headers: { "Content-Type": "application/json" },
       });
     }
     const filePath = body.url;
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
     console.log("error", error);
     return new NextResponse(JSON.stringify({ error }), {
       status: 400,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
