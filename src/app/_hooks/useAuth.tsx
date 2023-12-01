@@ -67,6 +67,7 @@ const useAuthProvider = () => {
     try {
       return await createUserWithEmailAndPassword(auth, email, password).then(
         (response: any) => {
+          setLoading(false);
           return createUser({
             uid: response.user.uid,
             email: email.toLowerCase(),

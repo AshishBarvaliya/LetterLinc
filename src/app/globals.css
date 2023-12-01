@@ -60,3 +60,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes moveBackground {
+  0% {
+    background-position: 300px 0;
+  }
+
+  100% {
+    background-position: 100vh 0;
+  }
+}
+
+.divWithDotsBackground {
+  animation: moveBackground 50s linear infinite;
+}
