@@ -11,9 +11,11 @@ import { UploadButton } from "./upload-button";
 
 interface UploadButtonProps {
   submitLoading: boolean;
+  uploadSuccess: () => void;
+  resumesData: ResumeProps[];
 }
 
-interface ResumeProps {
+export interface ResumeProps {
   id: string;
   filename: string;
   createdAt: string;
@@ -22,38 +24,10 @@ interface ResumeProps {
 
 export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
   submitLoading,
+  uploadSuccess,
+  resumesData,
 }) => {
-  const { user } = useAuth();
-  const storageRef = storage.ref();
   const [open, setOpen] = useState(false);
-  const [fetching, setFetching] = useState(true);
-  const [resumesData, setResumesData] = useState<ResumeProps[]>([]);
-
-  const fetchPdfFiles = async () => {
-    setFetching(true);
-    db.collection("resumes")
-      .where("email", "==", user.email)
-      .get()
-      .then((res) => {
-        let resumes: ResumeProps[] = [];
-        res.forEach(async (doc) => {
-          const itemRef = storageRef.child(doc.data().filepath);
-          let url = await itemRef.getDownloadURL();
-          resumes.push({
-            id: doc.id,
-            createdAt: doc.data().createdAt,
-            filename: doc.data().filename,
-            url: url,
-          });
-        });
-        setResumesData(resumes);
-        setFetching(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchPdfFiles();
-  }, []);
 
   return (
     <>
@@ -62,7 +36,7 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
         disabled={submitLoading}
         onClick={() => setOpen(true)}
       >
-        View all
+        Manage Resumes
       </Button>
       <Dialog
         open={open}
@@ -73,9 +47,7 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
         <DialogContent className="p-8 border w-[740px] min-h-[460px] max-w-[740px] border-border bg-background">
           <h4 className="text-lg">Your Resumes</h4>
           <div className="flex flex-wrap gap-4 min-h-[282px]">
-            {fetching ? (
-              <p>Loading...</p>
-            ) : resumesData.length ? (
+            {resumesData.length ? (
               resumesData
                 //@ts-ignore
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -109,7 +81,7 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
             <UploadButton
               submitLoading={submitLoading}
               setSubmitLoading={() => {}}
-              successCallback={fetchPdfFiles}
+              successCallback={uploadSuccess}
             />
           </div>
         </DialogContent>

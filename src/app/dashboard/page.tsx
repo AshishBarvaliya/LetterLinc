@@ -22,15 +22,46 @@ import {
 } from "../_components/ui/select";
 import { Label } from "../_components/ui/label";
 import { useToast } from "../_hooks/use-toast";
-import { UploadButton } from "../_components/upload-button";
-import { ViewResumeDialog } from "../_components/view-resume-dialog";
+import {
+  ResumeProps,
+  ViewResumeDialog,
+} from "../_components/view-resume-dialog";
+import { db, storage } from "../_lib/firebase";
 
 export default function Dashboard() {
   const router = useRouter();
   const { loading, user, signOut } = useAuth();
   const { toast } = useToast();
+  const storageRef = storage.ref();
 
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [resumesData, setResumesData] = useState<ResumeProps[]>([]);
+
+  const fetchPdfFiles = async () => {
+    db.collection("resumes")
+      .where("email", "==", user.email)
+      .get()
+      .then((res) => {
+        let resumes: ResumeProps[] = [];
+        res.forEach(async (doc) => {
+          const itemRef = storageRef.child(doc.data().filepath);
+          let url = await itemRef.getDownloadURL();
+          resumes.push({
+            id: doc.id,
+            createdAt: doc.data().createdAt,
+            filename: doc.data().filename,
+            url: url,
+          });
+        });
+        setResumesData(resumes);
+      });
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchPdfFiles();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -92,11 +123,11 @@ export default function Dashboard() {
                     <SelectItem value="system">System</SelectItem>
                   </SelectContent>
                 </Select>
-                <UploadButton
-                  setSubmitLoading={setSubmitLoading}
+                <ViewResumeDialog
                   submitLoading={submitLoading}
+                  uploadSuccess={fetchPdfFiles}
+                  resumesData={resumesData}
                 />
-                <ViewResumeDialog submitLoading={submitLoading} />
               </div>
             </div>
             <Textarea label={"Job Description"} />
