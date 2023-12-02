@@ -76,28 +76,31 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
             {fetching ? (
               <p>Loading...</p>
             ) : resumesData.length ? (
-              resumesData.map((resume, index) => (
-                <div
-                  key={index}
-                  className="w-52 p-2 border border-border bg-white/5"
-                >
-                  <embed src={resume.url} width="100%" height="200px" />
-                  <p className="truncate my-2">{resume.filename}</p>
-                  <div className="flex justify-between items-center">
-                    <p className="text-xs text-white/80">
-                      {moment(resume.createdAt).fromNow()}
-                    </p>
-                    <Button
-                      className="p-0 w-6 h-6"
-                      onClick={() => {
-                        window.open(resume.url, "_blank");
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
+              resumesData
+                //@ts-ignore
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((resume, index) => (
+                  <div
+                    key={index}
+                    className="w-52 p-2 border border-border bg-white/5"
+                  >
+                    <embed src={resume.url} width="100%" height="200px" />
+                    <p className="truncate my-2">{resume.filename}</p>
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-white/80">
+                        {moment(resume.createdAt).fromNow()}
+                      </p>
+                      <Button
+                        className="p-0 w-6 h-6"
+                        onClick={() => {
+                          window.open(resume.url, "_blank");
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))
             ) : (
               <p>No resumes</p>
             )}
