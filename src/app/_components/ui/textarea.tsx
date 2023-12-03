@@ -8,13 +8,15 @@ export interface TextareaProps
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
-  TextareaProps & { label: string }
+  TextareaProps & { label?: string }
 >(({ className, label, ...props }, ref) => {
   return (
     <div className="flex flex-col h-full">
-      <Label htmlFor={props.id} className="pb-3">
-        {label}
-      </Label>
+      {label ? (
+        <Label htmlFor={props.id} className="pb-3">
+          {label}
+        </Label>
+      ) : null}
       <textarea
         className={cn(
           "flex min-h-[80px] w-full h-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",

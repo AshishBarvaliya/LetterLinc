@@ -4,11 +4,11 @@ import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { CallbackManager } from "langchain/callbacks";
 
 const QA_PROMPT = `You are a helpful cover letter AI assistant. Use the following pieces of context/resume information and job description to write a cover letter. 
-NOTE: MAXIMUM LENGTH OF EMAIL MUST NOT BE MORE THAN 150 WORDS.
+NOTE: MAXIMUM LENGTH OF THE LETTER MUST NOT BE MORE THAN 150 WORDS.
 
 {context}
 
-Job description: {job_description}
+Job description: {question}
 Cover letter:`;
 
 export const makeChain = (

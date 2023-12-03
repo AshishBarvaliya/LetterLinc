@@ -26,17 +26,36 @@ import { ViewResumeDialog } from "../_components/view-resume-dialog";
 import { useHelpers } from "../_hooks/use-helpers";
 import axios from "axios";
 import Loader from "../_components/loader";
+import { db } from "../_lib/firebase";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "row",
+    backgroundColor: "#E4E4E4",
+  },
+  section: {
+    margin: 20,
+    padding: 20,
+    flexGrow: 1,
+    fontSize: 12,
+  },
+});
 export default function Dashboard() {
   const router = useRouter();
   const { loading, user, signOut } = useAuth();
-  const { fetchResumes, resumesData } = useHelpers();
+  const { fetchResumes, resumesData, isFetching } = useHelpers();
   const { toast } = useToast();
   const [data, setData] = useState<any>({
     resume: "",
     jobDescription: "",
   });
-  const [submitLoading, setSubmitLoading] = useState<boolean>(true);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [editedCoverLetter, setEditedCoverLetter] = useState<string>("");
+  const [generatedLetter, setGeneratedLetter] = useState<string>("");
 
   const handleGenerate = async () => {
     if (!data.resume) {
@@ -55,7 +74,7 @@ export default function Dashboard() {
       });
       return;
     }
-    if (data.jobDescription.trim() < 30) {
+    if (data.jobDescription.trim().length < 30) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -70,8 +89,8 @@ export default function Dashboard() {
           ?.vectorSpace,
         jobDescription: data.jobDescription,
       })
-      .then((data) => {
-        console.log(data);
+      .then((data: any) => {
+        setGeneratedLetter(data.data.text);
       })
       .catch((err) => {
         toast({
@@ -83,6 +102,40 @@ export default function Dashboard() {
       .finally(() => {
         setSubmitLoading(false);
       });
+  };
+
+  const handleSave = async () => {
+    if (!generatedLetter) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please generate a cover letter first",
+      });
+      return;
+    } else {
+      setSaveLoading(true);
+      db.collection("letters")
+        .add({
+          createdAt: new Date().toISOString(),
+          email: user?.email,
+          letter: generatedLetter,
+        })
+        .then(() => {
+          toast({
+            title: "Cover letter has been saved",
+          });
+        })
+        .catch((err) => {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "There was an error saving the cover letter",
+          });
+        })
+        .finally(() => {
+          setSaveLoading(false);
+        });
+    }
   };
 
   useEffect(() => {
@@ -141,6 +194,97 @@ export default function Dashboard() {
             <div>
               <Loader />
             </div>
+          ) : generatedLetter ? (
+            <>
+              <div className="flex justify-between">
+                <h2 className="text-2xl font-bold">Generated Cover Letter</h2>
+                {editMode ? null : (
+                  <PDFDownloadLink
+                    document={
+                      <Document>
+                        <Page size="A4" style={styles.page}>
+                          <View style={styles.section}>
+                            <Text>{generatedLetter}</Text>
+                          </View>
+                        </Page>
+                      </Document>
+                    }
+                    fileName="cover_letter.pdf"
+                  >
+                    {({ blob, url, loading, error }) =>
+                      loading ? null : (
+                        <Button disabled={saveLoading}>Download</Button>
+                      )
+                    }
+                  </PDFDownloadLink>
+                )}
+              </div>
+              {editMode ? (
+                <Textarea
+                  value={editedCoverLetter}
+                  onChange={(e) => setEditedCoverLetter(e.target.value)}
+                  autoFocus
+                />
+              ) : (
+                <div className="flex flex-1 overflow-x-auto whitespace-break-spaces text-white/80">
+                  {generatedLetter}
+                </div>
+              )}
+              <div className="flex justify-between">
+                <Button
+                  disabled={saveLoading}
+                  variant={"destructive"}
+                  onClick={() => {
+                    setEditMode(false);
+                    setGeneratedLetter("");
+                    setData({
+                      resume: "",
+                      jobDescription: "",
+                    });
+                  }}
+                >
+                  Discard
+                </Button>
+                <div className="flex gap-4">
+                  {editMode ? (
+                    <>
+                      <Button
+                        variant={"outline"}
+                        disabled={saveLoading}
+                        onClick={() => setEditMode(!editMode)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        disabled={saveLoading}
+                        onClick={() => {
+                          setGeneratedLetter(editedCoverLetter);
+                          setEditMode(!editMode);
+                        }}
+                      >
+                        Update
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant={"outline"}
+                        disabled={saveLoading}
+                        onClick={() => {
+                          setEditMode(!editMode);
+                          setEditedCoverLetter(generatedLetter);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button disabled={saveLoading} onClick={handleSave}>
+                        Save
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div className="flex flex-col gap-5 flex-1">
