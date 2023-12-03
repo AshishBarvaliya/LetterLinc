@@ -26,9 +26,9 @@ import { ViewResumeDialog } from "../_components/view-resume-dialog";
 import { useHelpers } from "../_hooks/use-helpers";
 import axios from "axios";
 import Loader from "../_components/loader";
-import { db } from "../_lib/firebase";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { SaveDialog } from "../_components/save-dialog";
 
 const styles = StyleSheet.create({
   page: {
@@ -53,9 +53,9 @@ export default function Dashboard() {
   });
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [editedCoverLetter, setEditedCoverLetter] = useState<string>("");
-  const [generatedLetter, setGeneratedLetter] = useState<string>("");
+  const [saveOpen, setSaveOpen] = useState<boolean>(false);
+  const [generatedLetter, setGeneratedLetter] = useState<string>("hu");
 
   const handleGenerate = async () => {
     if (!data.resume) {
@@ -102,40 +102,6 @@ export default function Dashboard() {
       .finally(() => {
         setSubmitLoading(false);
       });
-  };
-
-  const handleSave = async () => {
-    if (!generatedLetter) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please generate a cover letter first",
-      });
-      return;
-    } else {
-      setSaveLoading(true);
-      db.collection("letters")
-        .add({
-          createdAt: new Date().toISOString(),
-          email: user?.email,
-          letter: generatedLetter,
-        })
-        .then(() => {
-          toast({
-            title: "Cover letter has been saved",
-          });
-        })
-        .catch((err) => {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "There was an error saving the cover letter",
-          });
-        })
-        .finally(() => {
-          setSaveLoading(false);
-        });
-    }
   };
 
   useEffect(() => {
@@ -212,9 +178,7 @@ export default function Dashboard() {
                     fileName="cover_letter.pdf"
                   >
                     {({ blob, url, loading, error }) =>
-                      loading ? null : (
-                        <Button disabled={saveLoading}>Download</Button>
-                      )
+                      loading ? null : <Button>Download</Button>
                     }
                   </PDFDownloadLink>
                 )}
@@ -232,7 +196,6 @@ export default function Dashboard() {
               )}
               <div className="flex justify-between">
                 <Button
-                  disabled={saveLoading}
                   variant={"destructive"}
                   onClick={() => {
                     setEditMode(false);
@@ -250,13 +213,11 @@ export default function Dashboard() {
                     <>
                       <Button
                         variant={"outline"}
-                        disabled={saveLoading}
                         onClick={() => setEditMode(!editMode)}
                       >
                         Cancel
                       </Button>
                       <Button
-                        disabled={saveLoading}
                         onClick={() => {
                           setGeneratedLetter(editedCoverLetter);
                           setEditMode(!editMode);
@@ -269,7 +230,6 @@ export default function Dashboard() {
                     <>
                       <Button
                         variant={"outline"}
-                        disabled={saveLoading}
                         onClick={() => {
                           setEditMode(!editMode);
                           setEditedCoverLetter(generatedLetter);
@@ -277,9 +237,7 @@ export default function Dashboard() {
                       >
                         Edit
                       </Button>
-                      <Button disabled={saveLoading} onClick={handleSave}>
-                        Save
-                      </Button>
+                      <Button onClick={() => setSaveOpen(true)}>Save</Button>
                     </>
                   )}
                 </div>
@@ -327,6 +285,12 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      <SaveDialog
+        open={saveOpen}
+        setOpen={setSaveOpen}
+        generatedLetter={generatedLetter}
+        selectedResume={data.resume}
+      />
     </div>
   ) : null;
 }
