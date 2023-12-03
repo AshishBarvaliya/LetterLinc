@@ -92,7 +92,7 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
         </DialogContent>
       </Dialog>
       {isUploading ? (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex justify-center items-center">
+        <div className="fixed inset-0 z-60 bg-background/80 backdrop-blur-sm flex justify-center items-center">
           <h4 className="text-lg flex justify-center items-center">
             <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
             Uploaing....

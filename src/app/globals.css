@@ -74,3 +74,73 @@
 .divWithDotsBackground {
   animation: moveBackground 50s linear infinite;
 }
+
+
+.box {
+  height: 110px;
+  width: 110px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+.box .percent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 64px;
+}
+
+.box .water {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  transform: translate(0, 100%);
+  background: #22c55e;
+  transition: all .3s;
+}
+
+.water_wave {
+  width: 200%;
+  position: absolute;
+  bottom: 100%;
+}
+
+.water_wave.water_wave_back {
+  right: 0;
+  fill: #c7ffcd;
+  animation: wave-back 1.4s infinite linear;
+}
+
+.water_wave.water_wave_front {
+  left: 0;
+  fill: #22c55e;
+  margin-bottom: -1px;
+  animation: wave-front .7s infinite linear;
+}
+
+@keyframes wave-front {
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes wave-back {
+  100% {
+    transform: translate(50%, 0);
+  }
+}
