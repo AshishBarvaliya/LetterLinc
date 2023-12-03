@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export const ButtonHero = () => {
+export const LoginHero = () => {
   return (
     <div className="flex flex-1 h-full flex-col p-10 text-white">
       <div className="relative flex flex-col justify-between flex-1">

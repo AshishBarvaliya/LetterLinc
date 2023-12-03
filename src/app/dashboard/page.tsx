@@ -22,44 +22,20 @@ import {
 } from "../_components/ui/select";
 import { Label } from "../_components/ui/label";
 import { useToast } from "../_hooks/use-toast";
-import {
-  ResumeProps,
-  ViewResumeDialog,
-} from "../_components/view-resume-dialog";
-import { db, storage } from "../_lib/firebase";
+import { ViewResumeDialog } from "../_components/view-resume-dialog";
+import { useHelpers } from "../_hooks/use-helpers";
 
 export default function Dashboard() {
   const router = useRouter();
   const { loading, user, signOut } = useAuth();
+  const { fetchResumes, resumesData } = useHelpers();
   const { toast } = useToast();
-  const storageRef = storage.ref();
 
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
-  const [resumesData, setResumesData] = useState<ResumeProps[]>([]);
-
-  const fetchPdfFiles = async () => {
-    db.collection("resumes")
-      .where("email", "==", user.email)
-      .get()
-      .then((res) => {
-        let resumes: ResumeProps[] = [];
-        res.forEach(async (doc) => {
-          const itemRef = storageRef.child(doc.data().filepath);
-          let url = await itemRef.getDownloadURL();
-          resumes.push({
-            id: doc.id,
-            createdAt: doc.data().createdAt,
-            filename: doc.data().filename,
-            url: url,
-          });
-        });
-        setResumesData(resumes);
-      });
-  };
 
   useEffect(() => {
-    if (user) {
-      fetchPdfFiles();
+    if (user && user?.email) {
+      fetchResumes(user?.email);
     }
   }, [user]);
 
@@ -118,16 +94,14 @@ export default function Dashboard() {
                     <SelectValue placeholder="Select Resume" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {resumesData?.map((resume) => (
+                      <SelectItem key={resume?.id} value={resume?.id}>
+                        {resume?.filename}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <ViewResumeDialog
-                  submitLoading={submitLoading}
-                  uploadSuccess={fetchPdfFiles}
-                  resumesData={resumesData}
-                />
+                <ViewResumeDialog submitLoading={submitLoading} />
               </div>
             </div>
             <Textarea label={"Job Description"} />

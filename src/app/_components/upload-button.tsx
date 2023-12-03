@@ -8,15 +8,17 @@ import { db, storage } from "../_lib/firebase";
 import axios from "axios";
 
 interface UploadButtonProps {
-  submitLoading: boolean;
+  disabled: boolean;
   setSubmitLoading: (submitLoading: boolean) => void;
   successCallback?: () => void;
+  setIsUploading: (isUploading: boolean) => void;
 }
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   setSubmitLoading,
-  submitLoading,
+  disabled,
   successCallback,
+  setIsUploading,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -26,6 +28,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   const uploadFile = async (file: File) => {
     if (file) {
       setSubmitLoading(true);
+      setIsUploading(true);
       toast({
         title: "Uploading file...",
       });
@@ -67,6 +70,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
           })
           .finally(() => {
             setSubmitLoading(false);
+            setIsUploading(false);
           });
       });
     }
@@ -98,7 +102,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       <Button
         variant="outline"
         onClick={() => inputRef.current?.click()}
-        disabled={submitLoading}
+        disabled={disabled}
       >
         Upload
       </Button>

@@ -1,33 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import moment from "moment";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { db, storage } from "../_lib/firebase";
-import { useAuth } from "../_hooks/useAuth";
 import { ExternalLink } from "lucide-react";
 import { UploadButton } from "./upload-button";
+import { useHelpers } from "../_hooks/use-helpers";
+import { useAuth } from "../_hooks/useAuth";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { cn } from "../_lib/utils";
 
 interface UploadButtonProps {
   submitLoading: boolean;
-  uploadSuccess: () => void;
-  resumesData: ResumeProps[];
-}
-
-export interface ResumeProps {
-  id: string;
-  filename: string;
-  createdAt: string;
-  url: string;
 }
 
 export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
   submitLoading,
-  uploadSuccess,
-  resumesData,
 }) => {
+  const { user } = useAuth();
+  const { resumesData, fetchResumes, isFetching } = useHelpers();
   const [open, setOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   return (
     <>
@@ -47,7 +41,9 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
         <DialogContent className="p-8 border w-[740px] min-h-[460px] max-w-[740px] border-border bg-background">
           <h4 className="text-lg">Your Resumes</h4>
           <div className="flex flex-wrap gap-4 min-h-[282px]">
-            {resumesData.length ? (
+            {isFetching ? (
+              <p>Loading...</p>
+            ) : resumesData.length ? (
               resumesData
                 //@ts-ignore
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -77,15 +73,32 @@ export const ViewResumeDialog: React.FC<UploadButtonProps> = ({
               <p>No resumes</p>
             )}
           </div>
-          <div className="flex flex-1 justify-end mt-3">
+          <div className="flex flex-1 justify-between mt-3 items-center">
+            <p
+              className={cn(
+                "text-xs",
+                resumesData.length >= 6 ? "text-destructive" : "text-white/60"
+              )}
+            >
+              Max 6 resumes allowed
+            </p>
             <UploadButton
-              submitLoading={submitLoading}
+              disabled={submitLoading || isUploading || resumesData.length >= 6}
+              setIsUploading={setIsUploading}
               setSubmitLoading={() => {}}
-              successCallback={uploadSuccess}
+              successCallback={() => fetchResumes(user?.email)}
             />
           </div>
         </DialogContent>
       </Dialog>
+      {isUploading ? (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex justify-center items-center">
+          <h4 className="text-lg flex justify-center items-center">
+            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+            Uploaing....
+          </h4>
+        </div>
+      ) : null}
     </>
   );
 };

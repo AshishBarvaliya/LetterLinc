@@ -1,5 +1,5 @@
 import { SignupForm } from "../_components/sign-up-form";
-import { ButtonHero } from "../_components/login-hero";
+import { LoginHero } from "../_components/login-hero";
 import { LoginHeader } from "../_components/login-header";
 
 export default function SignUp() {
@@ -7,7 +7,7 @@ export default function SignUp() {
     <div className="flex h-screen">
       <LoginHeader buttonText="Login" href="/" />
       <div className="hidden lg:flex w-1/2 bg-zinc-900 border-r">
-        <ButtonHero />
+        <LoginHero />
       </div>
       <div className="flex w-full lg:w-1/2 justify-center p-6">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

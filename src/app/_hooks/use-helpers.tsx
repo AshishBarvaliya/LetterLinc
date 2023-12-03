@@ -1,0 +1,75 @@
+"use client";
+
+import { createContext, useContext, useState } from "react";
+import { db, storage } from "../_lib/firebase";
+
+interface ResumeProps {
+  id: string;
+  filename: string;
+  createdAt: string;
+  url: string;
+  vectorSpace: string;
+}
+
+type Context = {
+  resumesData: ResumeProps[];
+  fetchResumes: (email: string) => Promise<void>;
+  isFetching: boolean;
+};
+
+const HelpersContext = createContext({
+  resumesData: [],
+  fetchResumes: async () => {},
+  isFetching: false,
+} as Context);
+
+export const HelpersProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const storageRef = storage.ref();
+  const [isFetching, setIsFetching] = useState(false);
+  const [resumesData, setResumesData] = useState<ResumeProps[]>([]);
+
+  const fetchResumes = async (email: string) => {
+    setIsFetching(true);
+    db.collection("resumes")
+      .where("email", "==", email)
+      .get()
+      .then((res) => {
+        let resumes: ResumeProps[] = [];
+        res.forEach(async (doc) => {
+          const itemRef = storageRef.child(doc.data().filepath);
+          let url = await itemRef.getDownloadURL();
+          resumes.push({
+            id: doc.id,
+            createdAt: doc.data().createdAt,
+            filename: doc.data().filename,
+            url: url,
+            vectorSpace: doc.data().vectorSpace,
+          });
+        });
+        setResumesData(resumes);
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
+  };
+
+  return (
+    <HelpersContext.Provider
+      value={{
+        resumesData,
+        fetchResumes,
+        isFetching,
+      }}
+    >
+      {children}
+    </HelpersContext.Provider>
+  );
+};
+
+export const useHelpers = () => {
+  return useContext(HelpersContext);
+};

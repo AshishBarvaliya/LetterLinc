@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./_hooks/useAuth";
 import { Toaster } from "./_components/ui/toaster";
+import { HelpersProvider } from "./_hooks/use-helpers";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -25,10 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <AuthProvider>
-        <body className={roboto.className}>
-          {children}
-          <Toaster />
-        </body>
+        <HelpersProvider>
+          <body className={roboto.className}>
+            {children}
+            <Toaster />
+          </body>
+        </HelpersProvider>
       </AuthProvider>
     </html>
   );
