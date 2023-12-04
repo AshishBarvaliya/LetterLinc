@@ -1,16 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../_hooks/useAuth";
-import Image from "next/image";
-import { Avatar, AvatarFallback } from "../_components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../_components/ui/dropdown-menu";
 import { Button } from "../_components/ui/button";
 import { Textarea } from "../_components/ui/textarea";
 import {
@@ -45,7 +37,8 @@ const styles = StyleSheet.create({
 export default function Dashboard() {
   const router = useRouter();
   const { loading, user, signOut } = useAuth();
-  const { fetchResumes, resumesData, isFetching } = useHelpers();
+  const pathname = usePathname();
+  const { fetchResumes, resumesData } = useHelpers();
   const { toast } = useToast();
   const [data, setData] = useState<any>({
     resume: "",
@@ -111,179 +104,150 @@ export default function Dashboard() {
   }, [user]);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/");
-    }
-  }, [loading, router, user]);
+    setData({
+      resume: "",
+      jobDescription: "",
+    });
+    setEditMode(false);
+    setEditedCoverLetter("");
+    setGeneratedLetter("");
+  }, []);
 
-  return loading ? null : user ? (
-    <div className="flex h-screen">
-      <div className="flex justify-between fixed inset-0 items-center h-16 px-6 border-b border-border bg-background">
-        <div className="relative z-20 flex items-center text-lg font-medium gap-2">
-          <Image src="/logo.png" alt="Logo" width={24} height={24} />
-          LetterLinc
-        </div>
-        <div className="flex items-center cursor-pointer">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="relative h-8 w-8 rounded-full"
-                size="icon"
-              >
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback>
-                    {user?.name ? user?.name[0] : ""}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mt-1" align="end" forceMount>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => signOut()}
-              >
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      <div
-        className="divWithDotsBackground flex flex-1 justify-center mt-16 p-6"
-        style={{
-          backgroundImage: `url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgb(73, 73, 73)" /></svg>')`,
-        }}
-      >
-        <div className="flex flex-col gap-4 w-[800px] p-6 h-full border-border border rounded-md justify-between bg-background">
-          {submitLoading ? (
-            <div>
-              <Loader />
+  return (
+    <div
+      className="divWithDotsBackground flex flex-1 justify-center mt-16 p-6"
+      style={{
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgb(73, 73, 73)" /></svg>')`,
+      }}
+    >
+      <div className="flex flex-col gap-4 w-[800px] p-6 h-full border-border border rounded-md justify-between bg-background">
+        {submitLoading ? (
+          <div>
+            <Loader />
+          </div>
+        ) : generatedLetter ? (
+          <>
+            <div className="flex justify-between">
+              <h2 className="text-2xl font-bold">Generated Cover Letter</h2>
+              {editMode ? null : (
+                <PDFDownloadLink
+                  document={
+                    <Document>
+                      <Page size="A4" style={styles.page}>
+                        <View style={styles.section}>
+                          <Text>{generatedLetter}</Text>
+                        </View>
+                      </Page>
+                    </Document>
+                  }
+                  fileName="cover_letter.pdf"
+                >
+                  {({ blob, url, loading, error }) =>
+                    loading ? null : <Button>Download</Button>
+                  }
+                </PDFDownloadLink>
+              )}
             </div>
-          ) : generatedLetter ? (
-            <>
-              <div className="flex justify-between">
-                <h2 className="text-2xl font-bold">Generated Cover Letter</h2>
-                {editMode ? null : (
-                  <PDFDownloadLink
-                    document={
-                      <Document>
-                        <Page size="A4" style={styles.page}>
-                          <View style={styles.section}>
-                            <Text>{generatedLetter}</Text>
-                          </View>
-                        </Page>
-                      </Document>
-                    }
-                    fileName="cover_letter.pdf"
-                  >
-                    {({ blob, url, loading, error }) =>
-                      loading ? null : <Button>Download</Button>
-                    }
-                  </PDFDownloadLink>
+            {editMode ? (
+              <Textarea
+                value={editedCoverLetter}
+                onChange={(e) => setEditedCoverLetter(e.target.value)}
+                autoFocus
+              />
+            ) : (
+              <div className="flex flex-1 overflow-x-auto whitespace-break-spaces text-white/80">
+                {generatedLetter}
+              </div>
+            )}
+            <div className="flex justify-between">
+              <Button
+                variant={"destructive"}
+                onClick={() => {
+                  setEditMode(false);
+                  setGeneratedLetter("");
+                  setData({
+                    resume: "",
+                    jobDescription: "",
+                  });
+                }}
+              >
+                Discard
+              </Button>
+              <div className="flex gap-4">
+                {editMode ? (
+                  <>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => setEditMode(!editMode)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setGeneratedLetter(editedCoverLetter);
+                        setEditMode(!editMode);
+                      }}
+                    >
+                      Update
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        setEditMode(!editMode);
+                        setEditedCoverLetter(generatedLetter);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button onClick={() => setSaveOpen(true)}>Save</Button>
+                  </>
                 )}
               </div>
-              {editMode ? (
-                <Textarea
-                  value={editedCoverLetter}
-                  onChange={(e) => setEditedCoverLetter(e.target.value)}
-                  autoFocus
-                />
-              ) : (
-                <div className="flex flex-1 overflow-x-auto whitespace-break-spaces text-white/80">
-                  {generatedLetter}
-                </div>
-              )}
-              <div className="flex justify-between">
-                <Button
-                  variant={"destructive"}
-                  onClick={() => {
-                    setEditMode(false);
-                    setGeneratedLetter("");
-                    setData({
-                      resume: "",
-                      jobDescription: "",
-                    });
-                  }}
-                >
-                  Discard
-                </Button>
-                <div className="flex gap-4">
-                  {editMode ? (
-                    <>
-                      <Button
-                        variant={"outline"}
-                        onClick={() => setEditMode(!editMode)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setGeneratedLetter(editedCoverLetter);
-                          setEditMode(!editMode);
-                        }}
-                      >
-                        Update
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant={"outline"}
-                        onClick={() => {
-                          setEditMode(!editMode);
-                          setEditedCoverLetter(generatedLetter);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button onClick={() => setSaveOpen(true)}>Save</Button>
-                    </>
-                  )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-5 flex-1">
+              <div className="flex flex-col gap-3">
+                <Label>Resume</Label>
+                <div className="flex justify-between gap-4">
+                  <Select
+                    onValueChange={(value) =>
+                      setData({ ...data, resume: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Resume" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {resumesData?.map((resume) => (
+                        <SelectItem key={resume?.id} value={resume?.id}>
+                          {resume?.filename}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <ViewResumeDialog submitLoading={submitLoading} />
                 </div>
               </div>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col gap-5 flex-1">
-                <div className="flex flex-col gap-3">
-                  <Label>Resume</Label>
-                  <div className="flex justify-between gap-4">
-                    <Select
-                      onValueChange={(value) =>
-                        setData({ ...data, resume: value })
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Resume" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {resumesData?.map((resume) => (
-                          <SelectItem key={resume?.id} value={resume?.id}>
-                            {resume?.filename}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <ViewResumeDialog submitLoading={submitLoading} />
-                  </div>
-                </div>
-                <Textarea
-                  label={"Job Description"}
-                  value={data?.jobDescription}
-                  onChange={(e) =>
-                    setData({ ...data, jobDescription: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button disabled={submitLoading} onClick={handleGenerate}>
-                  Generate
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+              <Textarea
+                label={"Job Description"}
+                value={data?.jobDescription}
+                onChange={(e) =>
+                  setData({ ...data, jobDescription: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button disabled={submitLoading} onClick={handleGenerate}>
+                Generate
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       <SaveDialog
         open={saveOpen}
@@ -292,5 +256,5 @@ export default function Dashboard() {
         selectedResume={data.resume}
       />
     </div>
-  ) : null;
+  );
 }

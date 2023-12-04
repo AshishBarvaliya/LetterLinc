@@ -7,6 +7,7 @@ import { useAuth } from "../_hooks/useAuth";
 import { useToast } from "../_hooks/use-toast";
 import { db } from "../_lib/firebase";
 import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
 
 interface SaveDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
   selectedResume,
 }) => {
   const { toast } = useToast();
+  const router = useRouter();
   const { user } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -52,9 +54,11 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
           resume: selectedResume,
         })
         .then(() => {
+          setOpen(false);
           toast({
             title: "Cover letter has been saved",
           });
+          router.push("/dashboard/my-cover-letters");
         })
         .catch((err) => {
           toast({
