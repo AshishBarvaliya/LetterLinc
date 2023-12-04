@@ -56,7 +56,7 @@ export default function CoverLetter({ params }: any) {
       }}
     >
       <div className="flex flex-col gap-4 w-[800px] p-6 h-full border-border border rounded-md justify-between bg-background">
-        <div className="flex flex-col gap-4 flex-1">
+        <div className="flex flex-col h-full gap-4 flex-1">
           <div className="flex justify-between">
             <h1 className="text-lg font-bold">{coverLetter?.title}</h1>
             <PDFDownloadLink
@@ -79,14 +79,14 @@ export default function CoverLetter({ params }: any) {
           {loading ? (
             <p>Loading...</p>
           ) : coverLetter ? (
-            <div className="flex flex-col flex-1 gap-4 mt-4">
-              <div className="flex flex-1 overflow-x-auto whitespace-break-spaces text-white/80">
+            <>
+              <div className="flex flex-1 overflow-y-auto whitespace-break-spaces text-white/80">
                 {coverLetter.letter}
               </div>
               <div className="flex justify-end">
                 Resume: {coverLetter.resume}
               </div>
-            </div>
+            </>
           ) : null}
         </div>
       </div>

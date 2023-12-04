@@ -38,19 +38,25 @@ export const HelpersProvider = ({
       .where("email", "==", email)
       .get()
       .then((res) => {
-        let resumes: ResumeProps[] = [];
-        res.forEach(async (doc) => {
+        let promises: Promise<ResumeProps>[] = [];
+
+        res.forEach((doc) => {
           const itemRef = storageRef.child(doc.data().filepath);
-          let url = await itemRef.getDownloadURL();
-          resumes.push({
-            id: doc.id,
-            createdAt: doc.data().createdAt,
-            filename: doc.data().filename,
-            url: url,
-            vectorSpace: doc.data().vectorSpace,
+          const promise = itemRef.getDownloadURL().then((url) => {
+            return {
+              id: doc.id,
+              createdAt: doc.data().createdAt,
+              filename: doc.data().filename,
+              url: url,
+              vectorSpace: doc.data().vectorSpace,
+            };
           });
+          promises.push(promise);
         });
-        setResumesData(resumes);
+
+        Promise.all(promises).then((resumes) => {
+          setResumesData(resumes);
+        });
       })
       .finally(() => {
         setIsFetching(false);

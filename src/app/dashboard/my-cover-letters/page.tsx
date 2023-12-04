@@ -41,7 +41,7 @@ export default function MyCoverLetters() {
       }}
     >
       <div className="flex flex-col gap-4 w-[800px] p-6 h-full border-border border rounded-md justify-between bg-background">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 h-full ">
           <h1 className="text-lg font-bold">My Cover Letters</h1>
           {loading ? (
             <p>Loading...</p>
