@@ -3,6 +3,11 @@
   <h1 align="center">LetterLinc</h1>
   <p align="center">Personalized AI Cover Letter Generator</p>
 </p>
+<p align="center">
+  <a href="https://github.com/AshishBarvaliya/LetterLinc/blob/main/LICENSE">
+    <img alt="license" src="https://img.shields.io/badge/license-MIT-blue"/>
+  </a>
+</p>
 
 ## Introduction
 
@@ -10,21 +15,76 @@ LetterLinc is a cutting-edge SaaS application designed to streamline the cover l
 
 ## Features
 
-*   **AI-Powered Cover Letter Generation**: Utilize advanced AI to create personalized cover letters based on your resume and job description.
-*   **Resume Upload**: Easily upload your resume in PDF format.
-*   **PDF Extraction and Analysis**: Extract and analyze text from uploaded resumes, storing the data for optimized cover letter creation.
-*   **Save, Export, and Edit**: Save your cover letters, export them as PDFs, or make further edits as needed.
-*   **User Accounts**: Sign up for an account to manage your cover letters, allowing for easy access and modifications.
-*   **Vector Data Storage**: Employ Pincone Vector Store to maintain and utilize embedding data from resumes, enhancing the relevancy of generated cover letters.
+- **AI-Powered Cover Letter Generation**: Utilize advanced AI to create personalized cover letters based on your resume and job description.
+- **Resume Upload**: Easily upload your resume in PDF format.
+- **PDF Extraction and Analysis**: Extract and analyze text from uploaded resumes, storing the data for optimized cover letter creation.
+- **Save, Export, and Edit**: Save your cover letters, export them as PDFs, or make further edits as needed.
+- **User Accounts**: Sign up for an account to manage your cover letters, allowing for easy access and modifications.
+- **Vector Data Storage**: Employ Pincone Vector Store to maintain and utilize embedding data from resumes, enhancing the relevancy of generated cover letters.
 
 ## Technology Stack
 
-*   **Frontend**: Next.js with TypeScript - for a robust and type-safe user interface.
-*   **Backend**: Firebase - provides a scalable backend solution, including authentication, database, and storage services.
-*   **AI and Machine Learning**: Custom AI algorithms for analyzing resumes and job descriptions, with embedding data stored in Pincone Vector Store.
+- **Frontend**: Next.js with TypeScript - for a robust and type-safe user interface.
+- **Backend**: Firebase - provides a scalable backend solution, including authentication, database, and storage services.
+- **AI and Machine Learning**: Custom AI algorithms for analyzing resumes and job descriptions, with embedding data stored in Pincone Vector Store.
 
 ## Screenshots
 
+<p align="center">
+    <figure>
+     <figcaption align="center">
+        <b>Filling Details</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/generate.png" alt="Private Channel" />
+    </figure>
+    <figure>
+     <figcaption align="center">
+        <b>Genrated Cover letter</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/download.png" alt="Private Channel" />
+    </figure>
+    <figure>
+     <figcaption align="center">
+        <b>Download PDF</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/downloaded_pdf.png" alt="Private Channel" />
+    </figure>
+</p>
+
+<details>
+  <summary>Show more screenshots</summary>
+  <figure>
+     <figcaption align="center">
+        <b>Create new account</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/new_account.png" alt="Private Channel" />
+    </figure>
+  
+  <figure>
+     <figcaption align="center">
+        <b>Login</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/login.png" alt="Private Channel" />
+    </figure>
+  <figure>
+     <figcaption align="center">
+        <b>Manage Resumes</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/manage_resumes.png" alt="Private Channel" />
+    </figure>
+    <figure>
+     <figcaption align="center">
+        <b>Save Cover Letters</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/save.png" alt="Private Channel" />
+    </figure>
+    <figure>
+     <figcaption align="center">
+        <b>View Saved Cover Letters</b>
+      </figcaption>
+      <img width="1402" src="public/screenshots/view_saved_coverletters.png" alt="Private Channel" />
+    </figure>
+</details>
 
 ## Getting Started
 
@@ -52,11 +112,12 @@ npm install
 
 4.  **Set up Firebase:**
 
-*   Create a `.env` file in the root of your project.
-*   Add your Firebase project configuration to `.env`. For example:
+- Create a `.env` file in the root of your project.
+- Add your Firebase project configuration to `.env`. For example:
 
 ```markdown
 # Firebase Configuration
+
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
@@ -65,11 +126,13 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
 
 # OpenAI Configuration
+
 OPENAI_API_KEY=your_openai_api_key
 
 # Pinecone Configuration
+
 PINECONE_API_KEY=your_pinecone_api_key
-PINECONE_PROJECT_ID=your_pinecone_project_id
+PINECONE_ENVIRONMENT=your_pinecone_env
 PINECONE_INDEX_NAME=your_preferred_index_name
 ```
 
@@ -81,7 +144,6 @@ npm run dev
 
 Navigate to `http://localhost:3000` to view your project running locally.
 
-
 ## Usage
 
 1.  **Create an Account/Login**: Sign up or log in to access the cover letter generation features.
@@ -90,8 +152,6 @@ Navigate to `http://localhost:3000` to view your project running locally.
 4.  **Generate Cover Letter**: Click the generate button to produce your personalized cover letter.
 5.  **Save, Export, or Edit**: Once generated, you can save your cover letter, export it as a PDF, or make further edits.
 
-
 ### Contribution
 
 Feel free to contribute to the project by submitting pull requests or opening issues for any bugs or feature requests. Your feedback and contributions are highly appreciated!
-
