@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent } from "./ui/dialog";
@@ -8,14 +8,14 @@ import { useToast } from "../_hooks/use-toast";
 import { db } from "../_lib/firebase";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
-
+ 
 interface SaveDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   generatedLetter: string;
   selectedResume: string;
 }
-
+ 
 export const SaveDialog: React.FC<SaveDialogProps> = ({
   open,
   setOpen,
@@ -27,7 +27,8 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
   const { user } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
   const [title, setTitle] = useState("");
-
+  const [description, setDescription] = useState("");
+ 
   const handleSave = async () => {
     if (!generatedLetter) {
       toast({
@@ -52,6 +53,7 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
           letter: generatedLetter,
           title: title,
           resume: selectedResume,
+          description: description,
         })
         .then(() => {
           setOpen(false);
@@ -72,7 +74,7 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
         });
     }
   };
-
+ 
   return (
     <Dialog
       open={open}
@@ -89,6 +91,14 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             label="Title"
+            required
+          />
+          <Input
+            id="description"
+            name="description"
+            value={description}
+            onChange={(e) => setTitle(e.target.value)}
+            label="Description"
             required
           />
         </div>
